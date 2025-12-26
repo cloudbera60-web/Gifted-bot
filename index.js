@@ -102,6 +102,9 @@ const {
 const PORT = process.env.PORT || 4420;
 const app = express();
 
+// Bot instance - declared globally
+let Gifted = null;
+
 // In-memory store for active sessions
 const activeSessions = new Map();
 let currentSessionId = null;
@@ -322,17 +325,20 @@ function decodeSessionId(sessionId) {
         throw new Error("Invalid session ID format");
     }
 }
-// Load session from ID - separate function since loadSession is imported
+
+// Load session from ID
 const loadSessionFromId = function() {
     if (currentSessionId) {
         try {
             const sessionData = decodeSessionId(currentSessionId);
+            console.log('✅ Session loaded from ID:', currentSessionId.substring(0, 20) + '...');
             return sessionData;
         } catch (error) {
             console.error("Failed to load session from ID:", error);
             return null;
         }
     }
+    console.log('⚠️ No currentSessionId available');
     return null;
 };
 
@@ -350,27 +356,51 @@ const RECONNECT_DELAY = 5000;
 
 async function startGifted() {
     try {
-        const { version, isLatest } = await fetchLatestWaWebVersion();
+        console.log('🚀 Starting Gifted-MD in web interface mode...');
         
-        // Use existing session or create new one
+        const { version, isLatest } = await fetchLatestWaWebVersion();
+        console.log(`📱 Using WhatsApp Web version: ${version}`);
+        
+        // WEB INTERFACE MODE
         let state;
+        
+        // First try to load from web interface session ID
         if (currentSessionId) {
-            // Load from session ID
-            const sessionData = loadSession();
-            if (sessionData) {
+            const sessionData = loadSessionFromId();
+            if (sessionData && sessionData.creds) {
                 state = {
                     creds: sessionData.creds || {},
                     keys: sessionData.keys || {},
                     saveCreds: async () => {
-                        // Save updated creds
-                        console.log("Credentials updated");
+                        console.log("✅ Credentials updated");
                     }
                 };
+                console.log('✅ Session loaded from web interface ID');
             }
         }
         
-        // If no session ID or failed to load, use file auth state
+        // If no session from web interface, try file auth state
         if (!state) {
+            console.log('📁 Attempting to use file-based auth state...');
+            const sessionDir = path.join(__dirname, "gift", "session");
+            
+            // Check if we have an existing session
+            const credsPath = path.join(sessionDir, "creds.json");
+            if (await fs.pathExists(credsPath)) {
+                console.log('📄 Found existing session file');
+                try {
+                    const fileState = await useMultiFileAuthState(sessionDir);
+                    state = fileState;
+                    console.log('✅ Loaded existing session from file');
+                } catch (fileError) {
+                    console.error('❌ Failed to load session file:', fileError.message);
+                }
+            }
+        }
+        
+        // If still no state, create empty one
+        if (!state) {
+            console.log('🆕 No session found, starting fresh...');
             const sessionDir = path.join(__dirname, "gift", "session");
             const fileState = await useMultiFileAuthState(sessionDir);
             state = fileState;

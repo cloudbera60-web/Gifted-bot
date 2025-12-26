@@ -322,9 +322,8 @@ function decodeSessionId(sessionId) {
         throw new Error("Invalid session ID format");
     }
 }
-
-// Load session from ID
-loadSession = function() {
+// Load session from ID - separate function since loadSession is imported
+const loadSessionFromId = function() {
     if (currentSessionId) {
         try {
             const sessionData = decodeSessionId(currentSessionId);

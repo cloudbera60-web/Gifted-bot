@@ -352,17 +352,35 @@ function formatBytes(bytes) {
   }
     }
 
-async function loadSession() {
+async function loadSession(sessionId = null) {
     try {
+        // Check if session file already exists
         if (fs.existsSync(sessionPath)) {
-            fs.unlinkSync(sessionPath);
+            console.log("✅ Session file already exists");
+            return;
         }
 
-        if (!config.SESSION_ID || typeof config.SESSION_ID !== 'string') {
-            throw new Error("❌ SESSION_ID is missing or invalid");
+        // Check if sessionId is provided as parameter (web interface mode)
+        const sessionToUse = sessionId || config.SESSION_ID;
+        
+        if (!sessionToUse || typeof sessionToUse !== 'string') {
+            console.warn("⚠️ SESSION_ID not found. Running in web interface mode.");
+            
+            // Check if we have a session directory with existing session
+            if (fs.existsSync(sessionDir) && fs.existsSync(sessionPath)) {
+                console.log("✅ Using existing session file");
+                return; // Session already exists
+            }
+            
+            // Don't throw error in web interface mode
+            if (!sessionId) {
+                // Only throw if we're not in web interface mode AND no config.SESSION_ID
+                throw new Error("❌ SESSION_ID is missing or invalid");
+            }
+            return; // For web interface mode, just return
         }
 
-        const [header, b64data] = config.SESSION_ID.split('~');
+        const [header, b64data] = sessionToUse.split('~');
 
         if (header !== "Gifted" || !b64data) {
             throw new Error("❌ Invalid session format. Expected 'Gifted~.....'");
@@ -377,11 +395,17 @@ async function loadSession() {
         }
 
         fs.writeFileSync(sessionPath, decompressedData, "utf8");
-        console.log("✅ Session File Loaded");
+        console.log("✅ Session File Loaded from provided ID");
 
     } catch (e) {
         console.error("❌ Session Error:", e.message);
-        throw e;
+        
+        // Don't throw in web interface mode if it's just a missing SESSION_ID
+        if (e.message.includes("SESSION_ID is missing") && sessionId === null) {
+            console.log("ℹ️ Running without SESSION_ID (web interface mode)");
+        } else {
+            throw e;
+        }
     }
 }
 

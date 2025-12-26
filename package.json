@@ -8,15 +8,6 @@
     "npm": "10.x",
     "node": "22.x"
   },
-  "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "pm2:start": "pm2 start index.js --name giftedmd",
-    "pm2:stop": "pm2 stop giftedmd",
-    "pm2:restart": "pm2 restart giftedmd",
-    "pm2:logs": "pm2 logs giftedmd",
-    "pm2:status": "pm2 status"
-  },
   "keywords": [
     "gifted-md",
     "whatsapp-bot",
@@ -36,7 +27,7 @@
     "buffer": "*",
     "dotenv": "*",
     "express": "^4.19.2",
-    "file-type": "17.1.6",
+    "file-type": "16.5.4",
     "ffmpeg-static": "*",
     "fluent-ffmpeg": "*",
     "@hapi/boom": "*",

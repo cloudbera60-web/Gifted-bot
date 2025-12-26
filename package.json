@@ -9,9 +9,13 @@
     "node": "22.x"
   },
   "scripts": {
-    "start": "pm2 start index.js --name giftedmd",
-    "stop": "pm2 stop giftedmd",
-    "restart": "pm2 restart giftedmd"
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "pm2:start": "pm2 start index.js --name giftedmd",
+    "pm2:stop": "pm2 stop giftedmd",
+    "pm2:restart": "pm2 restart giftedmd",
+    "pm2:logs": "pm2 logs giftedmd",
+    "pm2:status": "pm2 status"
   },
   "keywords": [
     "gifted-md",

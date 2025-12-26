@@ -8,6 +8,10 @@
     "npm": "10.x",
     "node": "22.x"
   },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
   "keywords": [
     "gifted-md",
     "whatsapp-bot",

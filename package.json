@@ -25,6 +25,7 @@
     "gifted-btns": "^1.0.0",
     "axios": "^1.2.5",
     "acrcloud": "*",
+   "cors": "^2.8.5",
     "adm-zip": "*",
     "google-tts-api": "*",
     "body-parser": "latest",

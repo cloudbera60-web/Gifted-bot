@@ -7,7 +7,7 @@ const crypto = require('crypto');
 
 class SessionManager {
     constructor() {
-        this.sessionDir = path.join(__dirname, '..', 'gift', 'session');
+        this.sessionDir = path.join(__dirname, 'gift', 'session');
         this.sessionPath = path.join(this.sessionDir, 'creds.json');
         this.sessionLockPath = path.join(this.sessionDir, '.lock');
         this.backupDir = path.join(this.sessionDir, 'backups');
@@ -19,8 +19,8 @@ class SessionManager {
         const dirs = [
             this.sessionDir,
             this.backupDir,
-            path.join(__dirname, '..', 'gift', 'temp'),
-            path.join(__dirname, '..', 'public')
+            path.join(__dirname, 'gift', 'temp'),
+            path.join(__dirname, 'public')
         ];
         
         dirs.forEach(dir => {
@@ -32,16 +32,23 @@ class SessionManager {
 
     checkSessionExists() {
         try {
-            return fs.existsSync(this.sessionPath) && 
-                   fs.statSync(this.sessionPath).size > 100; // Minimum size check
+            if (!fs.existsSync(this.sessionPath)) {
+                return false;
+            }
+            
+            const stats = fs.statSync(this.sessionPath);
+            return stats.size > 100; // Minimum size check
         } catch (error) {
+            console.error('Error checking session:', error.message);
             return false;
         }
     }
 
     isSessionLocked() {
         try {
-            if (!fs.existsSync(this.sessionLockPath)) return false;
+            if (!fs.existsSync(this.sessionLockPath)) {
+                return false;
+            }
             
             const lockContent = fs.readFileSync(this.sessionLockPath, 'utf8');
             const lockData = JSON.parse(lockContent);
@@ -62,7 +69,7 @@ class SessionManager {
     setSessionLock(locked = true) {
         try {
             const lockData = {
-                locked,
+                locked: locked,
                 timestamp: Date.now(),
                 serviceId: process.env.RENDER_SERVICE_ID || process.env.RENDER_SERVICE_NAME || 'render-service'
             };
@@ -87,7 +94,7 @@ class SessionManager {
         this.setSessionLock(true);
 
         try {
-            console.log('🔍 Validating session format...');
+            console.log('Validating session format...');
             
             // Validate session format
             const [header, b64data] = sessionId.split('~');
@@ -100,7 +107,7 @@ class SessionManager {
                 };
             }
 
-            console.log('🔧 Cleaning session data...');
+            console.log('Cleaning session data...');
             
             // Clean base64 data
             const cleanB64 = b64data
@@ -116,7 +123,7 @@ class SessionManager {
                 };
             }
 
-            console.log('📥 Decoding session data...');
+            console.log('Decoding session data...');
             
             // Decode base64
             let compressedData;
@@ -130,7 +137,7 @@ class SessionManager {
                 };
             }
 
-            console.log('⚙️ Decompressing session...');
+            console.log('Decompressing session...');
             
             // Decompress data
             let decompressedData;
@@ -149,7 +156,7 @@ class SessionManager {
                 }
             }
 
-            console.log('🔎 Validating session structure...');
+            console.log('Validating session structure...');
             
             // Validate JSON structure
             let sessionJson;
@@ -168,25 +175,25 @@ class SessionManager {
                 this.clearSessionLock();
                 return {
                     success: false,
-                    error: `Invalid session data: ${parseError.message}`
+                    error: 'Invalid session data: ' + parseError.message
                 };
             }
 
-            console.log('💾 Creating backup of existing session...');
+            console.log('Creating backup of existing session...');
             
             // Backup existing session if it exists
             if (this.checkSessionExists()) {
                 try {
-                    const backupName = `creds_backup_${Date.now()}.json`;
+                    const backupName = 'creds_backup_' + Date.now() + '.json';
                     const backupPath = path.join(this.backupDir, backupName);
                     fs.copyFileSync(this.sessionPath, backupPath);
-                    console.log(`📦 Backup created: ${backupName}`);
+                    console.log('Backup created: ' + backupName);
                 } catch (backupError) {
-                    console.warn('⚠️ Failed to create backup:', backupError.message);
+                    console.warn('Failed to create backup:', backupError.message);
                 }
             }
 
-            console.log('💿 Saving new session...');
+            console.log('Saving new session...');
             
             // Save new session
             fs.writeFileSync(this.sessionPath, decompressedData, 'utf8');
@@ -202,17 +209,17 @@ class SessionManager {
             const authInfoPath = path.join(this.sessionDir, 'auth_info_baileys.json');
             try {
                 fs.writeFileSync(authInfoPath, JSON.stringify(sessionJson, null, 2));
-                console.log('✅ Created auth_info_baileys.json');
+                console.log('Created auth_info_baileys.json');
             } catch (authError) {
-                console.warn('⚠️ Failed to create auth_info_baileys.json:', authError.message);
+                console.warn('Failed to create auth_info_baileys.json:', authError.message);
             }
 
-            console.log('🎉 Session saved successfully');
+            console.log('Session saved successfully');
             
             // Release lock after short delay
             setTimeout(() => {
                 this.clearSessionLock();
-                console.log('🔓 Session lock released');
+                console.log('Session lock released');
             }, 5000);
 
             return {
@@ -222,7 +229,7 @@ class SessionManager {
             };
 
         } catch (error) {
-            console.error('❌ Session save error:', error);
+            console.error('Session save error:', error);
             this.clearSessionLock();
             return {
                 success: false,
@@ -244,7 +251,7 @@ class SessionManager {
 
     clearSession() {
         try {
-            console.log('🧹 Clearing session files...');
+            console.log('Clearing session files...');
             
             let clearedCount = 0;
             const filesToClear = [
@@ -252,56 +259,63 @@ class SessionManager {
                 path.join(this.sessionDir, 'auth_info_baileys.json'),
                 path.join(this.sessionDir, 'app-state-sync-version.json'),
                 path.join(this.sessionDir, 'app-state-sync-key-id.json'),
-                path.join(this.sessionDir, 'pre-key-*'),
-                path.join(this.sessionDir, 'sender-key-*'),
-                path.join(this.sessionDir, 'session-*')
+                this.sessionLockPath
             ];
 
-            filesToClear.forEach(filePattern => {
+            // Clear specific files
+            filesToClear.forEach(filePath => {
                 try {
-                    if (filePattern.includes('*')) {
-                        // Handle wildcard patterns
-                        const dir = path.dirname(filePattern);
-                        const pattern = path.basename(filePattern);
-                        
-                        if (fs.existsSync(dir)) {
-                            const files = fs.readdirSync(dir);
-                            files.forEach(file => {
-                                if (file.match(new RegExp(pattern.replace('*', '.*')))) {
-                                    fs.unlinkSync(path.join(dir, file));
-                                    clearedCount++;
-                                }
-                            });
-                        }
-                    } else if (fs.existsSync(filePattern)) {
-                        fs.unlinkSync(filePattern);
+                    if (fs.existsSync(filePath)) {
+                        fs.unlinkSync(filePath);
                         clearedCount++;
                     }
                 } catch (fileError) {
-                    console.warn(`⚠️ Could not clear ${filePattern}:`, fileError.message);
+                    console.warn('Could not clear ' + filePath + ':', fileError.message);
                 }
             });
 
-            // Clear lock file
-            this.clearSessionLock();
-            
+            // Clear pre-key files
+            try {
+                if (fs.existsSync(this.sessionDir)) {
+                    const files = fs.readdirSync(this.sessionDir);
+                    files.forEach(file => {
+                        if (file.startsWith('pre-key-') || 
+                            file.startsWith('sender-key-') || 
+                            file.startsWith('session-')) {
+                            try {
+                                fs.unlinkSync(path.join(this.sessionDir, file));
+                                clearedCount++;
+                            } catch (e) {
+                                // Ignore
+                            }
+                        }
+                    });
+                }
+            } catch (dirError) {
+                console.warn('Could not clear session files:', dirError.message);
+            }
+
             // Clear backup directory
             try {
                 if (fs.existsSync(this.backupDir)) {
                     const backupFiles = fs.readdirSync(this.backupDir);
                     backupFiles.forEach(file => {
-                        fs.unlinkSync(path.join(this.backupDir, file));
+                        try {
+                            fs.unlinkSync(path.join(this.backupDir, file));
+                        } catch (e) {
+                            // Ignore
+                        }
                     });
                 }
             } catch (backupError) {
-                console.warn('⚠️ Could not clear backups:', backupError.message);
+                console.warn('Could not clear backups:', backupError.message);
             }
 
-            console.log(`🗑️ Cleared ${clearedCount} session files`);
+            console.log('Cleared ' + clearedCount + ' session files');
             return true;
             
         } catch (error) {
-            console.error('❌ Failed to clear session:', error);
+            console.error('Failed to clear session:', error);
             return false;
         }
     }

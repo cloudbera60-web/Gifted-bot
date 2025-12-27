@@ -1,19 +1,20 @@
-
+[file name]: public/deploy.html
+[file content begin]
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GIFTED-MD Deployment - Render</title>
+    <title>GIFTED-MD Deployment</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -24,69 +25,31 @@
         
         .container {
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             width: 100%;
-            max-width: 800px;
+            max-width: 600px;
             overflow: hidden;
         }
         
         .header {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            background: #4f46e5;
             color: white;
-            padding: 30px;
+            padding: 20px;
             text-align: center;
         }
         
         .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-        
-        .header p {
-            opacity: 0.9;
-            font-size: 1.1rem;
-        }
-        
-        .status-bar {
-            background: #f3f4f6;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #9ca3af;
-        }
-        
-        .status-dot.active {
-            background: #10b981;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            font-size: 24px;
+            margin-bottom: 5px;
         }
         
         .content {
-            padding: 40px;
+            padding: 30px;
         }
         
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         
         label {
@@ -94,179 +57,108 @@
             margin-bottom: 8px;
             font-weight: 600;
             color: #374151;
-            font-size: 0.95rem;
         }
         
         textarea {
             width: 100%;
-            padding: 15px;
+            padding: 12px;
             border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            font-family: 'Monaco', 'Courier New', monospace;
-            font-size: 0.9rem;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
             resize: vertical;
-            min-height: 150px;
-            transition: all 0.3s;
+            min-height: 120px;
         }
         
         textarea:focus {
             outline: none;
             border-color: #4f46e5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
         
         .hint {
-            margin-top: 8px;
-            font-size: 0.85rem;
+            margin-top: 5px;
+            font-size: 12px;
             color: #6b7280;
-        }
-        
-        .hint code {
-            background: #f3f4f6;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: monospace;
         }
         
         .buttons {
             display: flex;
-            gap: 15px;
-            margin-top: 30px;
+            gap: 10px;
+            margin-top: 20px;
         }
         
         button {
             flex: 1;
-            padding: 16px;
+            padding: 12px;
             border: none;
-            border-radius: 10px;
+            border-radius: 6px;
             font-weight: 600;
-            font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
         }
         
         .btn-deploy {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: #10b981;
             color: white;
         }
         
         .btn-deploy:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+            background: #059669;
         }
         
         .btn-deploy:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
         }
         
         .btn-stop {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: #ef4444;
             color: white;
         }
         
         .btn-stop:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+            background: #dc2626;
         }
         
-        .btn-restart {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            color: white;
+        .btn-stop:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
         
-        .btn-restart:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
-        }
-        
-        .status-container {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f9fafb;
-            border-radius: 10px;
-            border-left: 4px solid #4f46e5;
-        }
-        
-        .status-title {
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .status-content {
-            font-family: monospace;
-            background: #1f2937;
-            color: #d1d5db;
+        .status {
+            margin-top: 20px;
             padding: 15px;
+            background: #f3f4f6;
             border-radius: 6px;
-            overflow-x: auto;
+            font-family: monospace;
+            font-size: 14px;
             max-height: 200px;
             overflow-y: auto;
-            font-size: 0.9rem;
         }
         
         .loading {
             display: none;
+            margin: 10px 0;
+            text-align: center;
         }
         
-        .loading.active {
-            display: block;
-            animation: spin 1s linear infinite;
+        .message {
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            display: none;
         }
         
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        .success-message {
+        .success {
             background: #d1fae5;
             color: #065f46;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
             display: none;
         }
         
-        .error-message {
+        .error {
             background: #fee2e2;
             color: #991b1b;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
             display: none;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                margin: 10px;
-            }
-            
-            .header {
-                padding: 20px;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .content {
-                padding: 20px;
-            }
-            
-            .buttons {
-                flex-direction: column;
-            }
         }
     </style>
 </head>
@@ -274,15 +166,7 @@
     <div class="container">
         <div class="header">
             <h1>GIFTED-MD Deployment</h1>
-            <p>Deploy your WhatsApp bot on Render with one click</p>
-        </div>
-        
-        <div class="status-bar">
-            <div class="status-indicator">
-                <div class="status-dot" id="statusDot"></div>
-                <span id="statusText">Checking status...</span>
-            </div>
-            <div id="serviceId"></div>
+            <p>Deploy your WhatsApp bot on Render</p>
         </div>
         
         <div class="content">
@@ -292,98 +176,52 @@
                     id="sessionId" 
                     placeholder="Paste your session ID here (starts with Gifted~...)"
                     spellcheck="false"></textarea>
-                <div class="hint">
-                    Format: <code>Gifted~BASE64_ENCODED_SESSION_DATA</code>
-                </div>
+                <div class="hint">Format: Gifted~BASE64_ENCODED_SESSION_DATA</div>
             </div>
             
             <div class="buttons">
                 <button class="btn-deploy" onclick="deployBot()" id="deployBtn">
-                    <span>🚀 Deploy Bot</span>
-                    <div class="loading" id="deployLoading">⟳</div>
+                    🚀 Deploy Bot
                 </button>
                 <button class="btn-stop" onclick="stopBot()" id="stopBtn">
-                    <span>⏹️ Stop Bot</span>
-                    <div class="loading" id="stopLoading">⟳</div>
-                </button>
-                <button class="btn-restart" onclick="restartBot()" id="restartBtn">
-                    <span>🔄 Restart Bot</span>
-                    <div class="loading" id="restartLoading">⟳</div>
+                    ⏹️ Stop Bot
                 </button>
             </div>
             
-            <div class="success-message" id="successMessage"></div>
-            <div class="error-message" id="errorMessage"></div>
+            <div class="loading" id="loading">
+                Processing...
+            </div>
             
-            <div class="status-container">
-                <div class="status-title">
-                    <span>📊 Deployment Status</span>
-                    <button onclick="refreshStatus()" style="background: none; border: none; color: #4f46e5; cursor: pointer; font-size: 0.9rem;">
-                        🔄 Refresh
-                    </button>
-                </div>
-                <pre class="status-content" id="statusOutput">Loading...</pre>
+            <div class="message success" id="successMessage"></div>
+            <div class="message error" id="errorMessage"></div>
+            
+            <div class="status">
+                <strong>Status:</strong>
+                <pre id="statusOutput">Loading...</pre>
             </div>
         </div>
     </div>
 
     <script>
-        let statusInterval;
-        
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            loadStatus();
-            statusInterval = setInterval(loadStatus, 5000);
-        });
-        
-        // Load deployment status
         async function loadStatus() {
             try {
                 const response = await fetch('/api/status');
                 const data = await response.json();
                 
-                updateStatusUI(data);
+                // Update status display
+                document.getElementById('statusOutput').textContent = 
+                    JSON.stringify(data, null, 2);
                 
-                // Update service ID
-                document.getElementById('serviceId').textContent = 
-                    data.renderServiceId === 'not-set' ? 
-                    'Render Service' : 
-                    `Service: ${data.renderServiceId.substring(0, 8)}...`;
+                // Update buttons based on status
+                document.getElementById('deployBtn').disabled = data.botConnected;
+                document.getElementById('stopBtn').disabled = !data.botConnected;
                 
             } catch (error) {
                 document.getElementById('statusOutput').textContent = 
-                    `Error loading status: ${error.message}`;
+                    'Error loading status: ' + error.message;
             }
         }
         
-        // Update UI based on status
-        function updateStatusUI(data) {
-            const statusDot = document.getElementById('statusDot');
-            const statusText = document.getElementById('statusText');
-            const statusOutput = document.getElementById('statusOutput');
-            
-            // Update status indicator
-            if (data.botConnected) {
-                statusDot.className = 'status-dot active';
-                statusText.textContent = 'Bot Connected';
-            } else if (data.sessionExists) {
-                statusDot.className = 'status-dot';
-                statusText.textContent = 'Session Ready';
-            } else {
-                statusDot.className = 'status-dot';
-                statusText.textContent = 'Waiting for Deployment';
-            }
-            
-            // Update buttons state
-            document.getElementById('deployBtn').disabled = data.botConnected;
-            document.getElementById('stopBtn').disabled = !data.botConnected;
-            document.getElementById('restartBtn').disabled = !data.sessionExists;
-            
-            // Format status output
-            statusOutput.textContent = JSON.stringify(data, null, 2);
-        }
-        
-        // Deploy bot
         async function deployBot() {
             const sessionId = document.getElementById('sessionId').value.trim();
             
@@ -393,16 +231,13 @@
             }
             
             if (!sessionId.startsWith('Gifted~')) {
-                showError('Invalid session format. Must start with "Gifted~"');
+                showError('Invalid session format. Must start with Gifted~');
                 return;
             }
             
-            // Show loading
             const deployBtn = document.getElementById('deployBtn');
-            const deployLoading = document.getElementById('deployLoading');
             deployBtn.disabled = true;
-            deployLoading.classList.add('active');
-            
+            document.getElementById('loading').style.display = 'block';
             hideMessages();
             
             try {
@@ -418,26 +253,22 @@
                 
                 if (data.success) {
                     showSuccess(data.message);
-                    // Wait a moment and refresh status
                     setTimeout(loadStatus, 2000);
                 } else {
                     showError(data.message);
                 }
                 
             } catch (error) {
-                showError(`Deployment failed: ${error.message}`);
+                showError('Deployment failed: ' + error.message);
             } finally {
                 deployBtn.disabled = false;
-                deployLoading.classList.remove('active');
+                document.getElementById('loading').style.display = 'none';
             }
         }
         
-        // Stop bot
         async function stopBot() {
             const stopBtn = document.getElementById('stopBtn');
-            const stopLoading = document.getElementById('stopLoading');
             stopBtn.disabled = true;
-            stopLoading.classList.add('active');
             hideMessages();
             
             try {
@@ -455,79 +286,36 @@
                 }
                 
             } catch (error) {
-                showError(`Failed to stop: ${error.message}`);
+                showError('Failed to stop: ' + error.message);
             } finally {
-                setTimeout(() => {
-                    stopBtn.disabled = false;
-                    stopLoading.classList.remove('active');
-                }, 1000);
+                stopBtn.disabled = false;
             }
         }
         
-        // Restart bot
-        async function restartBot() {
-            const restartBtn = document.getElementById('restartBtn');
-            const restartLoading = document.getElementById('restartLoading');
-            restartBtn.disabled = true;
-            restartLoading.classList.add('active');
-            hideMessages();
-            
-            try {
-                const response = await fetch('/api/restart', {
-                    method: 'POST'
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    showSuccess(data.message);
-                    setTimeout(loadStatus, 3000);
-                } else {
-                    showError(data.message);
-                }
-                
-            } catch (error) {
-                showError(`Restart failed: ${error.message}`);
-            } finally {
-                setTimeout(() => {
-                    restartBtn.disabled = false;
-                    restartLoading.classList.remove('active');
-                }, 2000);
-            }
-        }
-        
-        // Refresh status
-        function refreshStatus() {
-            loadStatus();
-        }
-        
-        // Message handlers
         function showSuccess(message) {
-            const successEl = document.getElementById('successMessage');
-            successEl.textContent = message;
-            successEl.style.display = 'block';
-            
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-                successEl.style.display = 'none';
-            }, 5000);
+            const el = document.getElementById('successMessage');
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 5000);
         }
         
         function showError(message) {
-            const errorEl = document.getElementById('errorMessage');
-            errorEl.textContent = message;
-            errorEl.style.display = 'block';
-            
-            // Auto-hide after 10 seconds
-            setTimeout(() => {
-                errorEl.style.display = 'none';
-            }, 10000);
+            const el = document.getElementById('errorMessage');
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 10000);
         }
         
         function hideMessages() {
             document.getElementById('successMessage').style.display = 'none';
             document.getElementById('errorMessage').style.display = 'none';
         }
+        
+        // Initial load
+        loadStatus();
+        // Refresh every 5 seconds
+        setInterval(loadStatus, 5000);
     </script>
 </body>
 </html>
+[file content end]

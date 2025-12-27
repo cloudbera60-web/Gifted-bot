@@ -1,5 +1,3 @@
-[file name]: sessionManager.js
-[file content begin]
 const fs = require('fs-extra');
 const path = require('path');
 const zlib = require('zlib');
@@ -15,7 +13,6 @@ class SessionManager {
     }
 
     ensureDirectories() {
-        // Create all necessary directories
         const dirs = [
             this.sessionDir,
             this.backupDir,
@@ -37,7 +34,7 @@ class SessionManager {
             }
             
             const stats = fs.statSync(this.sessionPath);
-            return stats.size > 100; // Minimum size check
+            return stats.size > 100;
         } catch (error) {
             console.error('Error checking session:', error.message);
             return false;
@@ -54,7 +51,6 @@ class SessionManager {
             const lockData = JSON.parse(lockContent);
             const now = Date.now();
             
-            // Lock expires after 2 minutes
             if (now - lockData.timestamp > 120000) {
                 this.clearSessionLock();
                 return false;
@@ -90,13 +86,11 @@ class SessionManager {
     }
 
     async saveSession(sessionId) {
-        // Set lock to prevent concurrent saves
         this.setSessionLock(true);
 
         try {
             console.log('Validating session format...');
             
-            // Validate session format
             const [header, b64data] = sessionId.split('~');
             
             if (header !== 'Gifted' || !b64data) {
@@ -109,7 +103,6 @@ class SessionManager {
 
             console.log('Cleaning session data...');
             
-            // Clean base64 data
             const cleanB64 = b64data
                 .replace(/\.{3,}/g, '')
                 .replace(/\s/g, '')
@@ -125,7 +118,6 @@ class SessionManager {
 
             console.log('Decoding session data...');
             
-            // Decode base64
             let compressedData;
             try {
                 compressedData = Buffer.from(cleanB64, 'base64');
@@ -139,12 +131,10 @@ class SessionManager {
 
             console.log('Decompressing session...');
             
-            // Decompress data
             let decompressedData;
             try {
                 decompressedData = zlib.gunzipSync(compressedData);
             } catch (decompressError) {
-                // Try inflate if gunzip fails
                 try {
                     decompressedData = zlib.inflateSync(compressedData);
                 } catch (inflateError) {
@@ -158,12 +148,10 @@ class SessionManager {
 
             console.log('Validating session structure...');
             
-            // Validate JSON structure
             let sessionJson;
             try {
                 sessionJson = JSON.parse(decompressedData.toString('utf8'));
                 
-                // Basic validation of WhatsApp session structure
                 if (!sessionJson.creds) {
                     throw new Error('Missing credentials');
                 }
@@ -181,7 +169,6 @@ class SessionManager {
 
             console.log('Creating backup of existing session...');
             
-            // Backup existing session if it exists
             if (this.checkSessionExists()) {
                 try {
                     const backupName = 'creds_backup_' + Date.now() + '.json';
@@ -195,17 +182,14 @@ class SessionManager {
 
             console.log('Saving new session...');
             
-            // Save new session
             fs.writeFileSync(this.sessionPath, decompressedData, 'utf8');
             
-            // Set secure permissions
             try {
                 fs.chmodSync(this.sessionPath, 0o600);
             } catch (permError) {
-                // Ignore permission errors on some systems
+                // Ignore permission errors
             }
 
-            // Create auth_info_baileys.json for compatibility
             const authInfoPath = path.join(this.sessionDir, 'auth_info_baileys.json');
             try {
                 fs.writeFileSync(authInfoPath, JSON.stringify(sessionJson, null, 2));
@@ -216,7 +200,6 @@ class SessionManager {
 
             console.log('Session saved successfully');
             
-            // Release lock after short delay
             setTimeout(() => {
                 this.clearSessionLock();
                 console.log('Session lock released');
@@ -262,7 +245,6 @@ class SessionManager {
                 this.sessionLockPath
             ];
 
-            // Clear specific files
             filesToClear.forEach(filePath => {
                 try {
                     if (fs.existsSync(filePath)) {
@@ -274,7 +256,6 @@ class SessionManager {
                 }
             });
 
-            // Clear pre-key files
             try {
                 if (fs.existsSync(this.sessionDir)) {
                     const files = fs.readdirSync(this.sessionDir);
@@ -295,7 +276,6 @@ class SessionManager {
                 console.warn('Could not clear session files:', dirError.message);
             }
 
-            // Clear backup directory
             try {
                 if (fs.existsSync(this.backupDir)) {
                     const backupFiles = fs.readdirSync(this.backupDir);
@@ -357,4 +337,3 @@ class SessionManager {
 }
 
 module.exports = new SessionManager();
-[file content end]
